@@ -54,10 +54,7 @@
 
         // Xử lý khi quét thành công
         html5QrcodeScanner.render((decodedText) => {
-            // Gửi mã vạch đến server
-            socket.emit('scan', { barcode: decodedText });
-            
-            // Thêm vào danh sách
+            socket.emit('scan', { barcode: decodedText, sessionId: currentSessionId });
             addScanToList({
                 barcode: decodedText,
                 timestamp: new Date().toISOString()
