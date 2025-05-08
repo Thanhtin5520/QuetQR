@@ -51,7 +51,7 @@
                             <p class="mt-2">Quét mã QR bằng điện thoại để kết nối</p>
                         </div>
                         <div class="alert alert-info">
-                            <strong>IP Server:</strong> <span id="serverIP"></span>
+                            <strong>Backend URL:</strong> <span id="backendUrl"></span>
                         </div>
                     </div>
                 </div>
@@ -61,23 +61,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
-        const socket = io();
+        // Thay đổi URL này sau khi deploy backend lên Vercel
+        const BACKEND_URL = 'https://quet-qrbackend.vercel.app';
+        const socket = io(BACKEND_URL);
         let currentSessionId = null;
 
-        // Hiển thị IP server
-        fetch('/api/ip')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('serverIP').textContent = data.ip;
-                // Tạo mã QR
-                new QRCode(document.getElementById("qrcode"), {
-                    text: `http://${data.ip}:3000/scanner`,
-                    width: 200,
-                    height: 200
-                });
-            });
+        // Hiển thị URL backend
+        document.getElementById('backendUrl').textContent = BACKEND_URL;
+        
+        // Tạo mã QR
+        new QRCode(document.getElementById("qrcode"), {
+            text: 'https://thanhtin5520.github.io/QuetQR/',
+            width: 200,
+            height: 200
+        });
 
         // Nhận session ID từ server
         socket.on('sessionId', (sessionId) => {
@@ -106,7 +105,7 @@
         // Xóa lịch sử
         function clearHistory() {
             if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử?')) {
-                fetch('/api/clear-history', { method: 'POST' })
+                fetch(`${BACKEND_URL}/api/clear-history`, { method: 'POST' })
                     .then(() => {
                         document.getElementById('scanList').innerHTML = '';
                     });
@@ -114,7 +113,7 @@
         }
 
         // Tải lịch sử ban đầu
-        fetch('/api/history')
+        fetch(`${BACKEND_URL}/api/history`)
             .then(response => response.json())
             .then(data => {
                 data.forEach(scan => addScanToList(scan));

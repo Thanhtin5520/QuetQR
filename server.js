@@ -8,7 +8,12 @@ const os = require("os");
 
 const app = express();
 const server = http.createServer(app);
-const ioSocket = io(server);
+const ioSocket = io(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 // Database setup
 const db = new sqlite3.Database("scans.db", (err) => {
@@ -29,7 +34,16 @@ const db = new sqlite3.Database("scans.db", (err) => {
 });
 
 // Middleware
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+
+// CORS middleware
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 
 // Routes
 app.get("/api/ip", (req, res) => {
@@ -127,7 +141,12 @@ app.get("/scanner", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "scanner.html"));
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Xử lý cho Vercel
+if (process.env.NODE_ENV === 'production') {
+    module.exports = app;
+} else {
+    const PORT = process.env.PORT || 3000;
+    server.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
