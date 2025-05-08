@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Chat Messages</title>
+    <style>
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 500px;
+            height: 400px;
+            overflow-y: scroll;
+        }
+        #responseMessage {
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin - Chat Messages</h1>
+    <div id="messages"></div>
+
+    <h2>Respond to Message</h2>
+    <input type="text" id="responseMessage" placeholder="Type your response here" />
+    <button onclick="sendResponse()">Send Response</button>
+
+    <script>
+        // Hàm lấy tin nhắn từ API server
+        function fetchMessages() {
+            fetch('/messages')
+                .then(response => response.json())
+                .then(data => {
+                    const messagesDiv = document.getElementById('messages');
+                    messagesDiv.innerHTML = ''; // Xóa các tin nhắn hiện tại
+
+                    data.forEach(message => {
+                        const messageType = message.type === 'client' ? 'Client' : 'Server';
+                        const messageContent = message.content || 'No content'; // Đảm bảo rằng message.content tồn tại
+
+                        // Sử dụng textContent để tránh hiển thị object
+                        const messageElement = document.createElement('p');
+                        messageElement.textContent = `${messageType}: ${messageContent}`;
+                        messagesDiv.appendChild(messageElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching messages:', error);
+                });
+        }
+
+        // Gửi phản hồi từ admin
+        function sendResponse() {
+            const responseMessage = document.getElementById('responseMessage').value;
+            if (responseMessage) {
+                fetch('/send-response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: responseMessage })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    fetchMessages(); // Cập nhật lại danh sách tin nhắn sau khi gửi phản hồi
+                    document.getElementById('responseMessage').value = ''; // Xóa ô nhập
+                });
+            }
+        }
+
+        // Cập nhật danh sách tin nhắn mỗi 2 giây
+        setInterval(fetchMessages, 2000);
+
+        // Lấy tin nhắn ngay khi trang load
+        fetchMessages();
+        document.getElementById('responseMessage').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        sendResponse();
+    }
+});
+
+        
+    </script>
+</body>
+</html>
