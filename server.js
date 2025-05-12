@@ -145,7 +145,7 @@ app.get("/scanner", (req, res) => {
 if (process.env.NODE_ENV === 'production') {
     module.exports = app;
 } else {
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 8080;
     server.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
