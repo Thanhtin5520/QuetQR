@@ -130,6 +130,14 @@ ioSocket.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
+
+  socket.on('connect', () => {
+    console.log('Kết nối thành công với server');
+  });
+
+  socket.on('connect_error', (error) => {
+    console.error('Lỗi kết nối:', error);
+  });
 });
 
 // Route chính
@@ -150,3 +158,4 @@ if (process.env.NODE_ENV === 'production') {
         console.log(`Server running on port ${PORT}`);
     });
 }
+//
